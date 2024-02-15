@@ -352,7 +352,14 @@ namespace detinfo {
     double const driftVelocity = DriftVelocity(efield, temperature);
     double const x_ticks_coefficient = 0.001 * driftVelocity * samplingRate;
 
-    double const triggerOffset = trigger_offset(clock_data);
+    double extraOffset = 0.;
+    if ( clock_data.TriggerTime() > std::numeric_limits<double>::lowest() + std::numeric_limits<double>::epsilon() &&
+         clock_data.TriggerTime() < std::numeric_limits<double>::max() - std::numeric_limits<double>::epsilon()
+    ){
+      extraOffset = clock_data.TriggerTime()-clock_data.BeamGateTime();
+    }
+
+    double const triggerOffset = trigger_offset(clock_data) + clock_data.TPCClock().Ticks(extraOffset);
 
     std::vector<std::vector<std::vector<double>>> x_ticks_offsets(fGeo->Ncryostats());
     std::vector<std::vector<double>> drift_direction(fGeo->Ncryostats());
